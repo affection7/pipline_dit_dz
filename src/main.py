@@ -1,8 +1,12 @@
 import pandas as pd
 import psycopg2
+import os
 from psycopg2.extras import execute_values
+from dotenv import load_dotenv
 
-DATABASE_URL = "postgresql://postgres:1234@127.0.0.1:5432/postgres"
+load_dotenv()
+
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 with open('./ddl/staging/create_stg_customers.sql', encoding='utf-8') as f:
     sql_create = f.read()
