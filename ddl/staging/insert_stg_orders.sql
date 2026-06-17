@@ -1,0 +1,1 @@
+INSERT INTO staging.orders (order_id, customer_id, product_id, quantity, unit_price, currency, order_timestamp, status) VALUES %s;
