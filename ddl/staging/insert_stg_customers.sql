@@ -1,0 +1,1 @@
+INSERT INTO staging.customers (customer_id, full_name, email, phone, city, created_at) VALUES %s;
