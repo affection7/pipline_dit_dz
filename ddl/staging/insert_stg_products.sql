@@ -1,1 +1,1 @@
-INSERT INTO staging.products (product_id, product_name, category, price, currency, is_active) VALUES %s ON CONFLICT (product_id) DO NOTHING;
+INSERT INTO staging.products (product_id, product_name, category, price, currency, is_active) VALUES %s;
