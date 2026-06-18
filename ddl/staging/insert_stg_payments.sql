@@ -1,0 +1,1 @@
+INSERT INTO staging.payments (payment_id, order_id, payment_method, amount, currency, payment_timestamp) VALUES %s ON CONFLICT (payment_id) DO NOTHING;
