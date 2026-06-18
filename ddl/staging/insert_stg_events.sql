@@ -1,0 +1,1 @@
+INSERT INTO staging.events (event_id, customer_id, event_type, event_timestamp, product_id) VALUES %s ON CONFLICT (event_id) DO NOTHING;
