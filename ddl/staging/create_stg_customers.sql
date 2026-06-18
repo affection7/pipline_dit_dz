@@ -1,6 +1,6 @@
 CREATE SCHEMA IF NOT EXISTS staging;
 CREATE TABLE IF NOT EXISTS staging.customers (
-    customer_id VARCHAR(50) PRIMARY KEY,
+    customer_id VARCHAR(50),
     full_name VARCHAR(255),
     email VARCHAR(255),
     phone VARCHAR(100),
