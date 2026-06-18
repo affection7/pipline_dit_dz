@@ -1,5 +1,6 @@
+CREATE SCHEMA IF NOT EXISTS staging;
 CREATE TABLE IF NOT EXISTS staging.products (
-    product_id VARCHAR(50),
+    product_id VARCHAR(50) PRIMARY KEY,
     product_name VARCHAR(255),
     category VARCHAR(255),
     price VARCHAR(50),

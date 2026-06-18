@@ -1,5 +1,6 @@
+CREATE SCHEMA IF NOT EXISTS staging;
 CREATE TABLE IF NOT EXISTS staging.payments (
-    payment_id VARCHAR(50),
+    payment_id VARCHAR(50) PRIMARY KEY,
     order_id VARCHAR(50),
     payment_method VARCHAR(100),
     amount VARCHAR(50),
