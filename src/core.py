@@ -12,8 +12,8 @@ def execute_sql(cursor, path):
         cursor.execute(f.read())
     print("Таблица успешно создана")
 
-def load_table(cursor, table, df, columns):
-    rows = df[columns].values.tolist()
+def load_table(cursor, table, df):
+    rows = df.values.tolist()
     with open(f'./dml/core/insert_core_{table}.sql', encoding='utf-8') as f:
         execute_values(cursor, f.read(), rows)
     print(f"Успешно загружено {len(rows)} строк в таблицу {table}")
