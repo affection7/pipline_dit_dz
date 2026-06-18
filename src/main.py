@@ -31,9 +31,8 @@ with open('./ddl/staging/create_stg_products.sql', encoding='utf-8') as f:
 cursor.execute(sql_create_prod)
 
 
-
 df_cust = pd.read_csv('./data/customers.csv', sep=',')
-rows_cust = df_cust[['customer_id', 'full_name', 'email', 'phone', 'city', 'created_at']].values.tolist()
+rows_cust = df_cust[['customer_id', 'full_name', 'email', 'phone', 'city', 'created_at', 'loaded_at']].values.tolist()
 
 sql_insert_cust = './ddl/staging/insert_stg_customers.sql'
 
@@ -62,6 +61,26 @@ with open(sql_insert_pay, encoding='utf-8') as f:
 
 execute_values(cursor, sql_insert_pay, rows_pay)
 
+df_prod= pd.read_excel('./data/products.xlsx', sheet_name='products')
+rows_prod= df_prod[['product_id', 'product_name', 'category', 'price', 'currency', 'is_active']].values.tolist()
+
+sql_insert_prod= './ddl/staging/insert_stg_products.sql'
+
+with open(sql_insert_prod, encoding='utf-8') as f:
+    sql_insert_prod = f.read()
+
+execute_values(cursor, sql_insert_prod, rows_prod)
+
+df_events= pd.read_xml('./data/events.xml')
+rows_events= df_events[['event_id', 'customer_id', 'event_type', 'event_timestamp', 'product_id']].values.tolist()
+
+sql_insert_events= './ddl/staging/insert_stg_events.sql'
+
+with open(sql_insert_events, encoding='utf-8') as f:
+    sql_insert_events = f.read()
+
+execute_values(cursor, sql_insert_events, rows_events)
+
 conn.commit()
 cursor.close()
 conn.close()
@@ -69,3 +88,6 @@ conn.close()
 print(f"Успешно загружено {len(rows_cust)} строк в таблицу customers")
 print(f"Успешно загружено {len(rows_orders)} строк в таблицу  orders")
 print(f"Успешно загружено {len(rows_pay)} строк в таблицу  payments")
+print(f"Успешно загружено {len(rows_prod)} строк в таблицу  products")
+print(f"Успешно загружено {len(rows_events)} строк в таблицу  events")
+
