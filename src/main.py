@@ -11,83 +11,72 @@ conn = psycopg2.connect(DATABASE_URL)
 cursor = conn.cursor()
 
 with open('./ddl/staging/create_stg_customers.sql', encoding='utf-8') as f:
-    sql_create_cus = f.read()
-cursor.execute(sql_create_cus)
+    cursor.execute(f.read())
 
 with open('./ddl/staging/create_stg_events.sql', encoding='utf-8') as f:
-    sql_create_events = f.read()
-cursor.execute(sql_create_events)
+    cursor.execute(f.read())
 
 with open('./ddl/staging/create_stg_orders.sql', encoding='utf-8') as f:
-    sql_create_orders = f.read()
-cursor.execute(sql_create_orders)
+    cursor.execute(f.read())
 
 with open('./ddl/staging/create_stg_payments.sql', encoding='utf-8') as f:
-    sql_create_pay = f.read()
-cursor.execute(sql_create_pay)
+    cursor.execute(f.read())
 
 with open('./ddl/staging/create_stg_products.sql', encoding='utf-8') as f:
-    sql_create_prod = f.read()
-cursor.execute(sql_create_prod)
+    cursor.execute(f.read())
 
+cursor.execute("""
+    TRUNCATE TABLE staging.customers,staging.events,staging.orders,staging.payments,staging.products CASCADE;
+               """)
+conn.commit()
 
 df_cust = pd.read_csv('./data/customers.csv', sep=',')
-rows_cust = df_cust[['customer_id', 'full_name', 'email', 'phone', 'city', 'created_at', 'loaded_at']].values.tolist()
+rows_cust = df_cust[['customer_id', 'full_name', 'email', 'phone', 'city', 'created_at']].values.tolist()
 
-sql_insert_cust = './ddl/staging/insert_stg_customers.sql'
+with open('./ddl/staging/insert_stg_customers.sql', encoding='utf-8') as f:
+    sql_insert_cust = f.read()
 
-with open(sql_insert_cust, encoding='utf-8') as f:
-    sql_insert = f.read()
-
-execute_values(cursor, sql_insert, rows_cust)
+execute_values(cursor, sql_insert_cust, rows_cust)
+print(f"Успешно загружено {len(rows_cust)} строк в таблицу customers")
 
 df_orders = pd.read_json('./data/orders.json')
-rows_orders= df_orders[['order_id', 'customer_id', 'product_id', 'quantity', 'unit_price', 'currency', 'order_timestamp', 'status']].values.tolist()
+rows_orders = df_orders[['order_id', 'customer_id', 'product_id', 'quantity', 'unit_price', 'currency', 'order_timestamp', 'status']].values.tolist()
 
-sql_insert_orders= './ddl/staging/insert_stg_orders.sql'
-
-with open(sql_insert_orders, encoding='utf-8') as f:
+with open('./ddl/staging/insert_stg_orders.sql', encoding='utf-8') as f:
     sql_insert_orders = f.read()
 
 execute_values(cursor, sql_insert_orders, rows_orders)
+print(f"Успешно загружено {len(rows_orders)} строк в таблицу orders")
 
 df_pay = pd.read_csv('./data/payments.csv', sep='^')
-rows_pay= df_pay[['payment_id', 'order_id', 'payment_method', 'amount', 'currency', 'payment_timestamp']].values.tolist()
+rows_pay = df_pay[['payment_id', 'order_id', 'payment_method', 'amount', 'currency', 'payment_timestamp']].values.tolist()
 
-sql_insert_pay= './ddl/staging/insert_stg_payments.sql'
-
-with open(sql_insert_pay, encoding='utf-8') as f:
+with open('./ddl/staging/insert_stg_payments.sql', encoding='utf-8') as f:
     sql_insert_pay = f.read()
 
 execute_values(cursor, sql_insert_pay, rows_pay)
+print(f"Успешно загружено {len(rows_pay)} строк в таблицу payments")
 
-df_prod= pd.read_excel('./data/products.xlsx', sheet_name='products')
-rows_prod= df_prod[['product_id', 'product_name', 'category', 'price', 'currency', 'is_active']].values.tolist()
+df_prod = pd.read_excel('./data/products.xlsx', sheet_name='products')
+rows_prod = df_prod[['product_id', 'product_name', 'category', 'price', 'currency', 'is_active']].values.tolist()
 
-sql_insert_prod= './ddl/staging/insert_stg_products.sql'
-
-with open(sql_insert_prod, encoding='utf-8') as f:
+with open('./ddl/staging/insert_stg_products.sql', encoding='utf-8') as f:
     sql_insert_prod = f.read()
 
 execute_values(cursor, sql_insert_prod, rows_prod)
+print(f"Успешно загружено {len(rows_prod)} строк в таблицу products")
 
-df_events= pd.read_xml('./data/events.xml')
-rows_events= df_events[['event_id', 'customer_id', 'event_type', 'event_timestamp', 'product_id']].values.tolist()
 
-sql_insert_events= './ddl/staging/insert_stg_events.sql'
+df_events = pd.read_xml('./data/events.xml')
+df_events = df_events.drop_duplicates(subset=['event_id'])
+rows_events = df_events[['event_id', 'customer_id', 'event_type', 'event_timestamp', 'product_id']].values.tolist()
 
-with open(sql_insert_events, encoding='utf-8') as f:
+with open('./ddl/staging/insert_stg_events.sql', encoding='utf-8') as f:
     sql_insert_events = f.read()
 
 execute_values(cursor, sql_insert_events, rows_events)
+print(f"Успешно загружено {len(rows_events)} строк в таблицу events")
 
 conn.commit()
 cursor.close()
 conn.close()
-
-print(f"Успешно загружено {len(rows_cust)} строк в таблицу customers")
-print(f"Успешно загружено {len(rows_orders)} строк в таблицу  orders")
-print(f"Успешно загружено {len(rows_pay)} строк в таблицу  payments")
-print(f"Успешно загружено {len(rows_prod)} строк в таблицу  products")
-print(f"Успешно загружено {len(rows_events)} строк в таблицу  events")
-
