@@ -1,0 +1,1 @@
+INSERT INTO core.customers (customer_id, full_name, email, phone, city, created_at) VALUES %s ON CONFLICT (customer_id) DO NOTHING;
