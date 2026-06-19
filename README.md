@@ -1,12 +1,12 @@
 # ETL Pipeline
 
-## 📌 Описание проекта
+## Описание проекта
 
 Проект реализует ETL-пайплайн на Python для загрузки данных из файлов (CSV, JSON, Excel, XML) в PostgreSQL с разделением на staging и core слои.
 
 ---
 
-## 🏗️ Архитектура ETL пайплайна
+## Архитектура ETL пайплайна
 
 ```mermaid
 flowchart LR
@@ -27,14 +27,11 @@ C --> C1[NULL handling]
 C --> C2[Deduplication]
 C --> C3[FK validation]
 
-D --> D1[Customer & Orders model]
-E --> E1[KPI / dashboards]
 ```
-## 🗄️ Слои данных
+## Слои данных
 
 ### Staging
 - сырые данные
-- минимальные преобразования
 
 ### Core
 - очищенные данные
@@ -43,7 +40,7 @@ E --> E1[KPI / dashboards]
 
 ---
 
-## 🔄 ETL процесс
+## ETL процесс
 
 ### Staging
 - загрузка файлов в staging таблицы
@@ -57,7 +54,7 @@ E --> E1[KPI / dashboards]
 
 ---
 
-## 📊 ER Diagram (Core Layer)
+## ER Diagram (Core Layer)
 
 ```mermaid
 erDiagram
@@ -116,7 +113,7 @@ erDiagram
 ```
 ---
 
-## 🚀 Запуск проекта
+## Запуск проекта
 
 ### 1. Установить зависимости
 ```bash
@@ -136,7 +133,7 @@ DB_NAME=...
 ```bash
 python main.py
 ```
-## 📁 Структура проекта
+## Структура проекта
 
 ```text
 project/
