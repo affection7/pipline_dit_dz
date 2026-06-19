@@ -90,5 +90,4 @@ def clean_events(df):
 
     df = cast_timestamp(df, 'event_timestamp')
     df = drop_invalid(df, subset=['event_timestamp'])
-
     return normalize_nulls(df)

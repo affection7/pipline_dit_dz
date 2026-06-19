@@ -1,6 +1,7 @@
 import pandas as pd
 import psycopg2
 import os
+import logging
 from psycopg2.extras import execute_values
 from dotenv import load_dotenv
 
@@ -13,15 +14,16 @@ DB_NAME = os.getenv("DB_NAME")
 
 DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_IP}:{DB_PORT}/{DB_NAME}"
 
-def execute_sql(cursor, file_path):
-    with open(file_path, encoding='utf-8') as f:
+def execute_sql(cursor, path):
+    with open(path, encoding='utf-8') as f:
         cursor.execute(f.read())
+    logging.info(f"Таблица успешно создана: {path}")
 
 def load_table(cursor, table_name, df):
     rows = df.values.tolist()
     with open(f'./dml/staging/insert_stg_{table_name}.sql', encoding='utf-8') as f:
         execute_values(cursor, f.read(), rows)
-    print(f"Успешно загружено {len(rows)} строк в таблицу {table_name}")
+    logging.info(f"Успешно загружено {len(rows)} строк в таблицу {table_name}")
 
 def run_staging():
     conn = psycopg2.connect(DATABASE_URL)
