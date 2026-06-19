@@ -6,42 +6,29 @@
 
 ---
 
-## 🏗️ ETL Pipeline Architecture
+## 🏗️ Архитектура ETL пайплайна
 
 ```mermaid
 flowchart LR
 
-%% ======================
-%% SOURCES
-%% ======================
-A[📂 Data Sources<br/>CSV / JSON / Excel / XML]
+A[Data Sources: CSV / JSON / Excel / XML]
 
-%% ======================
-%% STAGING LAYER
-%% ======================
-B[🟡 Staging Layer<br/>Raw tables in PostgreSQL]
+B[Staging Layer]
 
-%% ======================
-%% TRANSFORMATION
-%% ======================
-C[⚙️ ETL Processing<br/>Pandas cleaning + validation]
+C[Validation Layer - cleaning + checks]
 
-%% ======================
-%% CORE LAYER
-%% ======================
-D[🟢 Core Layer<br/>Cleaned & validated tables]
+D[Core Layer - business data]
 
-%% ======================
-%% RELATIONSHIPS
-%% ======================
-A -->|load with pandas| B
-B -->|extract staging data| C
-C -->|FK validation + cleaning| D
+E[Analytics Layer - SQL / reports]
 
-%% optional internal detail
-C -.-> C1[Customer validation]
-C -.-> C2[Product validation]
-C -.-> C3[Order integrity checks]
+A --> B --> C --> D --> E
+
+C --> C1[NULL handling]
+C --> C2[Deduplication]
+C --> C3[FK validation]
+
+D --> D1[Customer & Orders model]
+E --> E1[KPI / dashboards]
 ```
 ## 🗄️ Слои данных
 
@@ -146,7 +133,7 @@ DB_NAME=...
 ```
 3. Запуск
 Проект запускается через единый входной файл:
-```python
+```bash
 python main.py
 ```
 ## 📁 Структура проекта
