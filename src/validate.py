@@ -23,6 +23,8 @@ def clean_customers(df):
     df = cast_numeric(df, 'customer_id')
     df = drop_invalid(df, subset=['customer_id'])
 
+    df['full_name'] = df['full_name'].str.strip()
+    
     df['phone'] = df['phone'].replace('UNKNOWN', pd.NA)
     df['phone'] = df['phone'].replace('', pd.NA)
 
