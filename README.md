@@ -149,14 +149,17 @@ DB_NAME=...
 ```python
 python main.py
 ```
-📁 Структура проекта
+## 📁 Структура проекта
+
+```text
 project/
 ├── data/
 ├── ddl/
 ├── dml/
+├── sql/
 ├── src/
-├── requirements.txt
 ├── .gitignore
 └── README.md
-
+├── requirements.txt
+```
 ---
