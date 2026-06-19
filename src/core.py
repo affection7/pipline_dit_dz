@@ -32,74 +32,94 @@ def read_staging_table(cursor, table_name):
     columns = [desc[0] for desc in cursor.description]
     return pd.DataFrame(rows, columns=columns)
 
+def filter_df(df, column, valid_values, msg):
+    before = len(df)
+    df = df[df[column].isin(valid_values)]
+    dropped = before - len(df)
+
+    if dropped:
+        logging.warning(f"{msg}: отброшено {dropped} строк")
+
+    return df
+
+def get_clean(table, cleaner, cursor):
+    df = read_staging_table(cursor, table)
+    return cleaner(df)
+
 def run_core():
     conn = psycopg2.connect(DATABASE_URL)
     cursor = conn.cursor()
 
-    execute_sql(cursor, './ddl/core/create_core_customers.sql')
-    execute_sql(cursor, './ddl/core/create_core_products.sql')
-    execute_sql(cursor, './ddl/core/create_core_orders.sql')
-    execute_sql(cursor, './ddl/core/create_core_payments.sql')
-    execute_sql(cursor, './ddl/core/create_core_events.sql')
+    ddl_files = [
+        './ddl/core/create_core_customers.sql',
+        './ddl/core/create_core_products.sql',
+        './ddl/core/create_core_orders.sql',
+        './ddl/core/create_core_payments.sql',
+        './ddl/core/create_core_events.sql',
+    ]
 
-    df = read_staging_table(cursor, 'customers')
-    df = clean_customers(df)
-    load_table(cursor, 'customers', df)
-    valid_customer_ids = set(df['customer_id'])
+    for path in ddl_files:
+        execute_sql(cursor, path)
 
-    df = read_staging_table(cursor, 'products')
-    df = clean_products(df)
-    load_table(cursor, 'products', df)
-    valid_product_ids = set(df['product_id'])
+    customers = get_clean('customers', clean_customers, cursor)
+    load_table(cursor, 'customers', customers)
+    valid_customer_ids = set(customers['customer_id'])
 
-    df = read_staging_table(cursor, 'orders')
-    df = clean_orders(df)
+    products = get_clean('products', clean_products, cursor)
+    load_table(cursor, 'products', products)
+    valid_product_ids = set(products['product_id'])
 
-    before = len(df)
-    df = df[df['customer_id'].isin(valid_customer_ids)]
-    dropped = before - len(df)
-    if dropped:
-        logging.warning(f"orders: отброшено {dropped} строк — customer_id не найден в core.customers")
+    orders = get_clean('orders', clean_orders, cursor)
 
-    before = len(df)
-    df = df[df['product_id'].isin(valid_product_ids)]
-    dropped = before - len(df)
-    if dropped:
-        logging.warning(f"orders: отброшено {dropped} строк — product_id не найден в core.products")
+    orders = filter_df(
+        orders,
+        'customer_id',
+        valid_customer_ids,
+        "orders: нет customer_id"
+    )
 
-    load_table(cursor, 'orders', df)
-    valid_order_ids = set(df['order_id'].astype(int))
+    orders = filter_df(
+        orders,
+        'product_id',
+        valid_product_ids,
+        "orders: нет product_id"
+    )
 
-    df = read_staging_table(cursor, 'payments')
-    df = clean_payments(df)
-    df['order_id'] = df['order_id'].astype(int)
+    load_table(cursor, 'orders', orders)
+    valid_order_ids = set(orders['order_id'].astype(int))
 
-    before = len(df)
-    df = df[df['order_id'].isin(valid_order_ids)]
-    dropped = before - len(df)
-    if dropped:
-        logging.warning(f"payments: отброшено {dropped} строк — order_id не найден в core.orders")
+    payments = get_clean('payments', clean_payments, cursor)
+    payments['order_id'] = payments['order_id'].astype(int)
 
-    load_table(cursor, 'payments', df)
+    payments = filter_df(
+        payments,
+        'order_id',
+        valid_order_ids,
+        "payments: нет order_id"
+    )
 
-    df = read_staging_table(cursor, 'events')
-    df = clean_events(df)
-    df['product_id'] = df['product_id'].astype(float).astype(int)
-    df['customer_id'] = df['customer_id'].astype(float).astype(int)
+    load_table(cursor, 'payments', payments)
 
-    before = len(df)
-    df = df[df['customer_id'].isin({int(x) for x in valid_customer_ids})]
-    dropped = before - len(df)
-    if dropped:
-        logging.warning(f"events: отброшено {dropped} строк — customer_id не найден в core.customers")
+    events = get_clean('events', clean_events, cursor)
 
-    before = len(df)
-    df = df[df['product_id'].isin({int(x) for x in valid_product_ids})]
-    dropped = before - len(df)
-    if dropped:
-        logging.warning(f"events: отброшено {dropped} строк — product_id не найден в core.products")
+    events['product_id'] = events['product_id'].astype(float).astype(int)
+    events['customer_id'] = events['customer_id'].astype(float).astype(int)
 
-    load_table(cursor, 'events', df)
+    events = filter_df(
+        events,
+        'customer_id',
+        set(map(int, valid_customer_ids)),
+        "events: нет customer_id"
+    )
+
+    events = filter_df(
+        events,
+        'product_id',
+        set(map(int, valid_product_ids)),
+        "events: нет product_id"
+    )
+
+    load_table(cursor, 'events', events)
 
     conn.commit()
     cursor.close()
