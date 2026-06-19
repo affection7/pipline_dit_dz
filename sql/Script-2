@@ -1,0 +1,15 @@
+SELECT
+    DATE_TRUNC('month', p.payment_timestamp) AS month,
+    SUM(
+        CASE p.currency
+            WHEN 'USD' THEN p.amount * 74
+            WHEN 'EUR' THEN p.amount * 84
+            WHEN 'RUB' THEN p.amount
+        END
+    ) AS revenue_rub
+FROM
+	core.payments p
+GROUP BY
+	DATE_TRUNC('month', p.payment_timestamp)
+ORDER BY
+	month;

@@ -1,0 +1,14 @@
+SELECT
+    pr.product_id,
+    pr.product_name,
+    SUM(o.quantity) AS total_quantity_sold,
+    COUNT(o.order_id) AS order_count
+FROM
+	core.orders o
+JOIN core.products pr
+	ON o.product_id = pr.product_id
+GROUP BY
+	pr.product_id, pr.product_name
+ORDER BY
+	total_quantity_sold DESC
+LIMIT 10;

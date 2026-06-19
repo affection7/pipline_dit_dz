@@ -1,0 +1,9 @@
+SELECT
+    c.customer_id,
+    c.full_name
+FROM
+	core.customers c
+LEFT JOIN core.orders o
+	ON c.customer_id = o.customer_id
+WHERE
+	o.order_id IS NULL;

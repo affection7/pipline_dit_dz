@@ -1,0 +1,21 @@
+SELECT
+    c.customer_id,
+    c.full_name,
+    SUM(
+        CASE p.currency
+            WHEN 'USD' THEN p.amount * 74
+            WHEN 'EUR' THEN p.amount * 84
+            WHEN 'RUB' THEN p.amount
+        END
+    ) AS total_spent_rub
+FROM
+	core.payments p
+JOIN core.orders o
+	ON p.order_id = o.order_id
+JOIN core.customers c
+	ON o.customer_id = c.customer_id
+GROUP BY
+	c.customer_id, c.full_name
+ORDER BY
+	total_spent_rub DESC
+LIMIT 10;

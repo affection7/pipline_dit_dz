@@ -1,0 +1,29 @@
+WITH top_buyers AS (
+    SELECT
+        customer_id,
+        COUNT(*) AS purchase_count
+    FROM
+		core.orders
+    WHERE
+		status = 'completed'
+    GROUP BY
+		customer_id
+    ORDER BY
+		purchase_count DESC
+    LIMIT 5
+)
+SELECT
+    tb.customer_id,
+    c.full_name,
+    tb.purchase_count,
+    MAX(e.event_timestamp) AS last_activity
+FROM
+	top_buyers tb
+JOIN
+	core.customers c ON tb.customer_id = c.customer_id
+LEFT JOIN
+	core.events e ON e.customer_id = tb.customer_id
+GROUP BY
+	tb.customer_id, c.full_name, tb.purchase_count
+ORDER BY
+	tb.purchase_count DESC;
